@@ -1,18 +1,13 @@
-import React from "react";
-import Background from "../components/Background";
-import NavBar from "../components/NavBar";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
 
-const App = () => {
-  return (
-    <div>
-      <Background/>
-      <NavBar/>
-      <div style={{ padding: "20px", color: "white", position: "relative", zIndex: 1 }}>
-        <h2>Welcome to Skin Disease Portal</h2>
-        <p>Get insights and information about skin conditions.</p>
-      </div>
-    </div>
-  );
-};
+const App = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Index/>} />
+      <Route path="*" element={<div>404 Not Found</div>} />
+    </Routes>
+  </BrowserRouter>
+);
 
 export default App;
