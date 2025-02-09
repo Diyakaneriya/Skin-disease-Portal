@@ -8,6 +8,7 @@ const images = [
 
 const Hero = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,6 +17,22 @@ const Hero = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileExtension = file.name.split(".").pop().toLowerCase();
+      if (["jpg", "jpeg", "png"].includes(fileExtension)) {
+        setSelectedImage(URL.createObjectURL(file)); // Optionally display the selected image
+      } else {
+        alert("Please upload an image with .jpg, .jpeg, or .png extension.");
+      }
+    }
+  };
+
+  const handleButtonClick = () => {
+    document.getElementById("file-upload").click();
+  };
 
   const styles = {
     container: {
@@ -84,6 +101,9 @@ const Hero = () => {
       cursor: "pointer",
       transition: "background-color 0.3s ease",
       fontSize: "1rem"
+    },
+    fileInput: {
+      display: "none"
     }
   };
 
@@ -112,10 +132,17 @@ const Hero = () => {
             technology. Get quick and accurate assessments to help identify
             potential skin conditions.
           </p>
-          <button style={styles.button}>
-          <i class="fa-solid fa-file-import">   </i>
+          <button style={styles.button} onClick={handleButtonClick}>
+            <i className="fa-solid fa-file-import"> </i>
             Upload Image
           </button>
+          <input
+            type="file"
+            id="file-upload"
+            accept=".jpg,.jpeg,.png"
+            style={styles.fileInput}
+            onChange={handleFileChange}
+          />
         </div>
       </div>
     </div>

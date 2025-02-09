@@ -1,7 +1,8 @@
 import { useState } from "react";
+import UserModal from "./UserModal"; // Import UserModal
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const navStyles = {
     nav: {
@@ -43,59 +44,39 @@ const Navbar = () => {
       border: "none",
       cursor: "pointer",
       transition: "all 0.3s ease"
-    },
-    dropdown: {
-      position: "absolute",
-      top: "100%",
-      right: "16px",
-      backgroundColor: "white",
-      border: "1px solid #e5e7eb",
-      borderRadius: "4px",
-      padding: "8px 0",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-      display: isOpen ? "block" : "none"
-    },
-    dropdownItem: {
-      padding: "8px 16px",
-      cursor: "pointer",
-      width: "200px",
-      transition: "background-color 0.3s ease",
-      backgroundColor: "transparent",
-      border: "none",
-      textAlign: "left",
-      fontSize: "14px"
     }
   };
 
   return (
-    <nav style={navStyles.nav}>
-      <div style={navStyles.container}>
-        <div style={navStyles.flex}>
-          <div>
-            <span style={navStyles.logo}>Skin-Disease-Portal</span>
-          </div>
-          
-          <div style={navStyles.navLinks}>
-            <button style={navStyles.button}>Home</button>
-            <button style={navStyles.button}>How to Use</button>
-            <button style={navStyles.button}>Types</button>
-          </div>
+    <>
+      <nav style={navStyles.nav}>
+        <div style={navStyles.container}>
+          <div style={navStyles.flex}>
+            <div>
+              <span style={navStyles.logo}>Skin-Disease-Portal</span>
+            </div>
 
-          <div>
-            <button 
-              style={navStyles.button}
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              <i class="fa-solid fa-user"></i>
-            </button>
-            <div style={navStyles.dropdown}>
-              <button style={navStyles.dropdownItem}>Sign In</button>
-              <button style={navStyles.dropdownItem}>Sign Up</button>
+            <div style={navStyles.navLinks}>
+              <button style={navStyles.button}>Home</button>
+              <button style={navStyles.button}>How to Use</button>
+              <button style={navStyles.button}>Types</button>
+            </div>
+
+            <div>
+              <button 
+                style={navStyles.button}
+                onClick={() => setIsModalOpen(true)} // Open modal on click
+              >
+                <i className="fa-solid fa-user"></i>
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* User Modal Component */}
+      <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 };
 
