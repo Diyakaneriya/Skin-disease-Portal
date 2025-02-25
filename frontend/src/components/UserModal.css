@@ -34,14 +34,16 @@
 /* Form fields */
 input[type="text"],
 input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
+input[type="password"],
+button[type="submit"] {
+    width: 100%; /* Same width */
+    padding: 12px; /* Same padding */
+    margin: 10px 0; /* Ensure consistent spacing */
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 16px; /* Match font size */
     transition: border-color 0.3s ease;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
 }
 
 input[type="text"]:focus,
@@ -54,15 +56,11 @@ input[type="password"]:focus {
 /* Submit button */
 button[type="submit"] {
     margin-top: 15px;
-    padding: 12px;
-    width: 100%;
     border: none;
     background-color: #007bff;
     color: white;
-    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 6px;
     transition: background-color 0.3s ease-in-out, transform 0.2s;
 }
 
@@ -70,6 +68,7 @@ button[type="submit"]:hover {
     background-color: #0056b3;
     transform: scale(1.05);
 }
+
 
 /* Switch between Sign Up / Sign In */
 .or {
