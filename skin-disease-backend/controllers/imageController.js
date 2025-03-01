@@ -76,4 +76,4 @@ const imageController = {
   }
 };
 
-module.exports = imageController
+module.exports = imageController;
