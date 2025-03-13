@@ -1,14 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const imageController = require('../controllers/imageController');
+const auth = require('../middleware/auth');
 
-// Upload an image (no authentication)
+// Upload an image (with authentication)
 router.post('/upload', 
-  imageController.uploadMiddleware, 
+  auth, 
+  imageController.uploadMiddleware,
   imageController.uploadImage
 );
 
-// Get specific image by ID (no authentication)
+// Get specific image by ID
 router.get('/:id', imageController.getImageById);
+
+// Get all images for logged-in user
+router.get('/user/me', auth, imageController.getUserImages);
 
 module.exports = router;

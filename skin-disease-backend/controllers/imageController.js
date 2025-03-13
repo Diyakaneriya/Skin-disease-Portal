@@ -34,28 +34,50 @@ const upload = multer({
 const imageController = {
   uploadMiddleware: upload.single('image'),
   
-  async uploadImage(req, res) {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'Please upload an image' });
-      }
-      
-      const imagePath = req.file.path.replace(/\\/g, '/'); // Normalize path for all OS
-      
-      // Save image info to database (no user ID for now)
-      const imageId = await imageModel.create(1, imagePath); // Use a dummy user ID (e.g., 1)
-      
-      res.status(201).json({
-        success: true,
-        imageId,
-        imagePath: `/${imagePath}`, // Path for frontend to access
-        message: 'Image uploaded successfully'
-      });
-    } catch (error) {
-      console.error('Upload error:', error);
-      res.status(500).json({ message: 'Failed to upload image' });
+  
+  // Add this function to imageController.js
+async getUserImages(req, res) {
+  try {
+    const userId = req.user.id;
+    const images = await imageModel.findByUserId(userId);
+    
+    // Add URL to each image
+    const imagesWithUrls = images.map(image => ({
+      ...image,
+      imageUrl: `${req.protocol}://${req.get('host')}/${image.image_path}`
+    }));
+    
+    res.status(200).json(imagesWithUrls);
+  } catch (error) {
+    console.error('Error fetching user images:', error);
+    res.status(500).json({ message: 'Failed to retrieve images' });
+  }
+},
+
+// Modify uploadImage to save the user's ID
+async uploadImage(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload an image' });
     }
-  },
+    
+    const userId = req.user.id; // Get user ID from auth middleware
+    const imagePath = req.file.path.replace(/\\/g, '/');
+    
+    // Save image with user ID
+    const imageId = await imageModel.create(userId, imagePath);
+    
+    res.status(201).json({
+      success: true,
+      imageId,
+      imagePath: `/${imagePath}`,
+      message: 'Image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ message: 'Failed to upload image' });
+  }
+},
   
   async getImageById(req, res) {
     try {

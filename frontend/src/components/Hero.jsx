@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { imageService, authService } from "../services/api";
 
 const images = [
   "./images3.jpeg",
@@ -8,13 +9,21 @@ const images = [
 
 const Hero = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check if user is logged in
+    const user = authService.getCurrentUser();
+    setIsLoggedIn(!!user);
+
+    // Image carousel
     const timer = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, []);
 
@@ -23,10 +32,46 @@ const Hero = () => {
     if (file) {
       const fileExtension = file.name.split(".").pop().toLowerCase();
       if (["jpg", "jpeg", "png"].includes(fileExtension)) {
-        setSelectedImage(URL.createObjectURL(file)); // Optionally display the selected image
+        setSelectedFile(file);
+        setSelectedImage(URL.createObjectURL(file));
+        setUploadStatus('');
       } else {
         alert("Please upload an image with .jpg, .jpeg, or .png extension.");
       }
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setUploadStatus('Please select an image first');
+      return;
+    }
+
+    if (!isLoggedIn) {
+      setUploadStatus('Please login to upload images');
+      return;
+    }
+
+    setUploading(true);
+    setUploadStatus('Uploading...');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+
+      const response = await imageService.uploadImage(formData);
+      
+      setUploadStatus('Image uploaded successfully!');
+      // Clear the selected file after successful upload
+      setSelectedFile(null);
+      setTimeout(() => {
+        setSelectedImage(null);
+      }, 2000);
+    } catch (error) {
+      setUploadStatus(`Upload failed: ${error.response?.data?.message || 'Unknown error'}`);
+      console.error('Upload error:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -35,75 +80,37 @@ const Hero = () => {
   };
 
   const styles = {
-    container: {
-      position: "relative",
-      height: "100vh",
-      width: "100%",
-      overflow: "hidden"
-    },
-    imageContainer: {
-      position: "absolute",
-      inset: 0,
-      width: "100%",
-      height: "100%"
-    },
-    image: {
-      position: "absolute",
-      inset: 0,
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      transition: "opacity 1s ease-in-out"
-    },
-    overlay: {
-      position: "absolute",
-      inset: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.4)",
-      backdropFilter: "blur(4px)"
-    },
-    content: {
-      position: "relative",
-      zIndex: 10,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100%"
-    },
-    box: {
-      maxWidth: "42rem",
-      margin: "0 auto",
-      padding: "32px",
-      backgroundColor: "rgba(255, 255, 255, 0.9)",
-      backdropFilter: "blur(8px)",
-      borderRadius: "16px",
-      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-      textAlign: "center"
-    },
-    heading: {
-      fontSize: "2.25rem",
-      fontWeight: "bold",
-      color: "#111827",
-      marginBottom: "16px"
-    },
-    text: {
-      fontSize: "1.125rem",
-      color: "#374151",
-      marginBottom: "32px"
-    },
-    button: {
+    // Your existing styles...
+    // Add these new styles:
+    uploadButton: {
       display: "inline-flex",
       alignItems: "center",
       padding: "12px 24px",
-      backgroundColor: "#111827",
+      backgroundColor: "#4a5568",
       color: "white",
       borderRadius: "8px",
       border: "none",
       cursor: "pointer",
       transition: "background-color 0.3s ease",
-      fontSize: "1rem"
+      fontSize: "1rem",
+      marginLeft: "10px"
     },
-    fileInput: {
-      display: "none"
+    previewContainer: {
+      marginTop: "20px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    },
+    previewImage: {
+      maxWidth: "300px",
+      maxHeight: "200px",
+      borderRadius: "8px",
+      marginBottom: "10px"
+    },
+    statusMessage: {
+      marginTop: "10px",
+      color: uploadStatus.includes('failed') ? "#e53e3e" : 
+             uploadStatus.includes('success') ? "#38a169" : "#4a5568"
     }
   };
 
@@ -123,7 +130,6 @@ const Hero = () => {
         ))}
         <div style={styles.overlay} />
       </div>
-
       <div style={styles.content}>
         <div style={styles.box}>
           <h1 style={styles.heading}>Skin Disease Detection</h1>
@@ -132,17 +138,47 @@ const Hero = () => {
             technology. Get quick and accurate assessments to help identify
             potential skin conditions.
           </p>
-          <button style={styles.button} onClick={handleButtonClick}>
-            <i className="fa-solid fa-file-import"> </i>
-            Upload Image
-          </button>
-          <input
-            type="file"
-            id="file-upload"
-            accept=".jpg,.jpeg,.png"
-            style={styles.fileInput}
-            onChange={handleFileChange}
-          />
+          
+          <div>
+            <button style={styles.button} onClick={handleButtonClick}>
+              <i className="fa-solid fa-file-import"></i> Select Image
+            </button>
+            
+            {selectedFile && (
+              <button 
+                style={styles.uploadButton} 
+                onClick={handleUpload}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Upload Image'}
+              </button>
+            )}
+            
+            <input
+              type="file"
+              id="file-upload"
+              accept=".jpg,.jpeg,.png"
+              style={styles.fileInput}
+              onChange={handleFileChange}
+            />
+          </div>
+          
+          {selectedImage && (
+            <div style={styles.previewContainer}>
+              <img src={selectedImage} alt="Preview" style={styles.previewImage} />
+              <p>Selected: {selectedFile.name}</p>
+            </div>
+          )}
+          
+          {uploadStatus && (
+            <p style={styles.statusMessage}>{uploadStatus}</p>
+          )}
+          
+          {!isLoggedIn && (
+            <p style={{marginTop: "15px", color: "#e53e3e"}}>
+              Please login to upload and analyze images
+            </p>
+          )}
         </div>
       </div>
     </div>
