@@ -1,58 +1,49 @@
 import React, { useState } from 'react';
 import './UserModal.css';
-import { authService } from '../services/api';
+import { authService } from '../services/api'; // Import the service
 
 const UserModal = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  
+  // Form fields
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError('');
-    setSuccess('');
     
     try {
       if (isLogin) {
         // Login
         await authService.login({
-          email: formData.email,
-          password: formData.password
+          email,
+          password
         });
-        setSuccess('Logged in successfully!');
-        setTimeout(() => {
-          onClose();
-          window.location.reload(); // Refresh to update UI based on login state
-        }, 1000);
+        onClose();
+        window.location.reload(); // Refresh to update UI
       } else {
         // Register
         await authService.register({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: 'patient' // Default role
+          name: username,
+          email,
+          password,
+          role: 'patient'
         });
-        setSuccess('Account created successfully!');
-        setTimeout(() => {
-          setIsLogin(true); // Switch to login form
-        }, 1000);
+        // Switch to login after successful registration
+        setIsLogin(true);
+        setError('Registration successful. Please login.');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,52 +53,48 @@ const UserModal = ({ isOpen, onClose }) => {
         <span className="close" onClick={onClose}>&times;</span>
         <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
         
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
+        {error && <p style={{color: 'red'}}>{error}</p>}
         
         <form onSubmit={handleSubmit}>
+          <label htmlFor="username">Username:</label>
+          <input 
+            type="text" 
+            id="username" 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required 
+          />
+          
           {!isLogin && (
             <>
-              <label htmlFor="name">Name:</label>
+              <label htmlFor="email">Email:</label>
               <input 
-                type="text" 
-                id="name" 
-                name="name" 
-                value={formData.name}
-                onChange={handleChange}
+                type="email" 
+                id="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required 
               />
             </>
           )}
           
-          <label htmlFor="email">Email:</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            value={formData.email}
-            onChange={handleChange}
-            required 
-          />
-          
           <label htmlFor="password">Password:</label>
           <input 
             type="password" 
             id="password" 
-            name="password" 
-            value={formData.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required 
           />
           
-          <button type="submit">
-            {isLogin ? 'Login' : 'Sign Up'}
+          <button type="submit" disabled={loading}>
+            {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
           </button>
         </form>
         
-        <p onClick={() => setIsLogin(!isLogin)} style={{ cursor: 'pointer', color: '#007bff' }}>
-          {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
-        </p>
+        <button type="button" onClick={() => setIsLogin(!isLogin)}>
+          {isLogin ? 'Switch to Sign Up' : 'Switch to Login'}
+        </button>
       </div>
     </div>
   );
