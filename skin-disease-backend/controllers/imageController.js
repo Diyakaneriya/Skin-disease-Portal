@@ -16,10 +16,13 @@ const storage = multer.diskStorage({
 
 // File filter for images
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  // Accept all image types including BMP files
+  if (file.mimetype.startsWith('image/') || 
+      file.mimetype === 'image/bmp' || 
+      path.extname(file.originalname).toLowerCase() === '.bmp') {
     cb(null, true);
   } else {
-    cb(new Error('Not an image! Please upload only images.'), false);
+    cb(new Error('Not an image! Please upload only images (including .bmp).'), false);
   }
 };
 
