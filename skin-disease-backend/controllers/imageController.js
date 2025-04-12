@@ -1,6 +1,12 @@
 const imageModel = require('../models/imageModel');
 const path = require('path');
 const multer = require('multer');
+const { exec, execSync } = require('child_process');
+const fs = require('fs');
+const util = require('util');
+
+// Convert callback-based exec to Promise-based
+const execPromise = util.promisify(exec);
 
 // Configure multer storage
 const storage = multer.diskStorage({
@@ -57,7 +63,7 @@ async getUserImages(req, res) {
   }
 },
 
-// Modify uploadImage to save the user's ID
+// Modify uploadImage to save the user's ID and extract features using Python script
 async uploadImage(req, res) {
   try {
     if (!req.file) {
@@ -70,11 +76,55 @@ async uploadImage(req, res) {
     // Save image with user ID
     const imageId = await imageModel.create(userId, imagePath);
     
+    // Process image with feature extraction script
+    let features = null;
+    let processingError = null;
+    
+    try {
+      console.log('Extracting features for image:', imagePath);
+      
+      // Create a temporary directory for the output if it doesn't exist
+      const tempDir = path.resolve(__dirname, '../temp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir);
+      }
+      
+      // Set up paths for the Python script
+      const absoluteImagePath = path.resolve(imagePath);
+      const outputPath = path.resolve(tempDir, `${imageId}.json`);
+      const scriptPath = path.resolve(__dirname, '../../ml-service/extract_features_cli.py');
+      
+      // Execute the Python script synchronously to wait for results
+      const { stdout, stderr } = await execPromise(`python "${scriptPath}" "${absoluteImagePath}" "${outputPath}"`);
+      
+      if (stderr) {
+        console.error('Python script stderr:', stderr);
+      }
+      
+      // Read the output JSON file
+      if (fs.existsSync(outputPath)) {
+        const featureData = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+        features = featureData.features;
+        console.log('Features extracted successfully');
+        
+        // Clean up - remove the temporary file
+        fs.unlinkSync(outputPath);
+      } else {
+        throw new Error('Feature extraction output file was not created');
+      }
+    } catch (featureError) {
+      console.error('Feature extraction error:', featureError.message);
+      processingError = 'Feature extraction failed, but image was saved';
+      // Image upload still succeeded, so we continue
+    }
+    
     res.status(201).json({
       success: true,
       imageId,
       imagePath: `/${imagePath}`,
-      message: 'Image uploaded successfully'
+      features: features,
+      processingError: processingError,
+      message: processingError || 'Image uploaded and processed successfully'
     });
   } catch (error) {
     console.error('Upload error:', error);
