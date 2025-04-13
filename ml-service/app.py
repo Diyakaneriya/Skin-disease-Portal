@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 import os
 import logging
-from feature_extractors.extractor import extract_features
+from flask_cors import CORS  
+from feature_extractors.skin_lesion_extractor import SkinLesionFeatureExtractor, format_features
 from utils.image_preprocessing import preprocess_image
 
 # Configure logging
@@ -10,6 +11,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app)  
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -50,15 +52,17 @@ def process_image():
         # Preprocess the image
         preprocessed_image = preprocess_image(absolute_image_path)
         
-        # Extract features using the provided feature extraction method
-        features = extract_features(preprocessed_image)
+        # Extract skin lesion specific features
+        skin_lesion_extractor = SkinLesionFeatureExtractor()
+        skin_lesion_features = skin_lesion_extractor.extract_features(preprocessed_image)
+        formatted_features = format_features(skin_lesion_features)
         
         # Return the extracted features
         response = {
             "success": True,
             "user_id": user_id,
             "image_id": image_id,
-            "features": features
+            "features": formatted_features
         }
         
         return jsonify(response)

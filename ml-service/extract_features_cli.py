@@ -14,7 +14,7 @@ import os
 import sys
 import json
 from utils.image_preprocessing import preprocess_image
-from feature_extractors.extractor import extract_features
+from feature_extractors.skin_lesion_extractor import SkinLesionFeatureExtractor, format_features
 
 def main():
     # Check command-line arguments
@@ -35,14 +35,16 @@ def main():
         # Preprocess the image
         processed_image = preprocess_image(image_path)
         
-        # Extract features
-        features = extract_features(processed_image)
+        # Extract skin lesion specific features
+        skin_lesion_extractor = SkinLesionFeatureExtractor()
+        skin_lesion_features = skin_lesion_extractor.extract_features(processed_image)
+        formatted_features = format_features(skin_lesion_features)
         
         # Format the result
         result = {
             "success": True,
             "image_path": image_path,
-            "features": features
+            "features": formatted_features
         }
         
         # Output the result

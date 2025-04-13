@@ -201,20 +201,172 @@ const Hero = () => {
               backgroundColor: '#f8f9fa',
               borderRadius: '8px',
               textAlign: 'left',
-              maxHeight: '300px',
+              maxHeight: '400px',
               overflowY: 'auto'
             }}>
-              <h3 style={{ marginBottom: '10px', color: '#333' }}>Extracted Features:</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                {Object.entries(features).slice(0, 10).map(([key, value]) => (
-                  <div key={key} style={{ marginBottom: '5px' }}>
-                    <strong>{key}:</strong> {typeof value === 'number' ? value.toFixed(4) : String(value).substring(0, 20)}
+              <h3 style={{ marginBottom: '15px', color: '#333', textAlign: 'center' }}>Dermatological Features Analysis</h3>
+              
+              {/* Display Asymmetry Score */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ borderBottom: '1px solid #ddd', paddingBottom: '5px', color: '#444' }}>Asymmetry Score</h4>
+                <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
+                  <div style={{ 
+                    width: '30px', 
+                    height: '30px', 
+                    borderRadius: '50%', 
+                    backgroundColor: features.Asymmetry === 0 ? '#4CAF50' : features.Asymmetry === 1 ? '#FFC107' : '#F44336',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    marginRight: '10px'
+                  }}>
+                    {features.Asymmetry}
                   </div>
-                ))}
+                  <span>
+                    {features.Asymmetry === 0 ? 'Symmetric' : 
+                     features.Asymmetry === 1 ? 'Asymmetric in one axis' : 
+                     'Asymmetric in both axes'}
+                  </span>
+                </div>
               </div>
-              <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666' }}>
-                Showing 10 of {Object.keys(features).length} features
-              </p>
+              
+              {/* Display ABCDE Features */}
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ borderBottom: '1px solid #ddd', paddingBottom: '5px', color: '#444' }}>Structural Features</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <strong>Pigment Network:</strong> 
+                    <span style={{ 
+                      marginLeft: '5px', 
+                      padding: '2px 5px', 
+                      backgroundColor: features.Pigment_Network === 'AT' ? '#FFC107' : '#4CAF50',
+                      borderRadius: '3px',
+                      color: 'white'
+                    }}>
+                      {features.Pigment_Network === 'AT' ? 'Atypical' : 'Typical'}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Dots/Globules:</strong> 
+                    <span style={{ 
+                      marginLeft: '5px', 
+                      padding: '2px 5px', 
+                      backgroundColor: features.Dots_Globules === 'A' ? '#4CAF50' : 
+                                      features.Dots_Globules === 'AT' ? '#FFC107' : '#4CAF50',
+                      borderRadius: '3px',
+                      color: 'white'
+                    }}>
+                      {features.Dots_Globules === 'A' ? 'Absent' : 
+                       features.Dots_Globules === 'AT' ? 'Atypical' : 'Typical'}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Streaks:</strong> 
+                    <span style={{ 
+                      marginLeft: '5px', 
+                      padding: '2px 5px', 
+                      backgroundColor: features.Streaks === 'P' ? '#FFC107' : '#4CAF50',
+                      borderRadius: '3px',
+                      color: 'white'
+                    }}>
+                      {features.Streaks === 'P' ? 'Present' : 'Absent'}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Regression Areas:</strong> 
+                    <span style={{ 
+                      marginLeft: '5px', 
+                      padding: '2px 5px', 
+                      backgroundColor: features.Regression_Areas === 'P' ? '#FFC107' : '#4CAF50',
+                      borderRadius: '3px',
+                      color: 'white'
+                    }}>
+                      {features.Regression_Areas === 'P' ? 'Present' : 'Absent'}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Blue-Whitish Veil:</strong> 
+                    <span style={{ 
+                      marginLeft: '5px', 
+                      padding: '2px 5px', 
+                      backgroundColor: features.Blue_Whitish_Veil === 'P' ? '#FFC107' : '#4CAF50',
+                      borderRadius: '3px',
+                      color: 'white'
+                    }}>
+                      {features.Blue_Whitish_Veil === 'P' ? 'Present' : 'Absent'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Display Color Features */}
+              <div>
+                <h4 style={{ borderBottom: '1px solid #ddd', paddingBottom: '5px', color: '#444' }}>Color Analysis</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.White ? '#f5f5f5' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.White ? '#000' : '#888',
+                    fontWeight: features.White ? 'bold' : 'normal'
+                  }}>
+                    White {features.White ? '✓' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.Red ? '#ffebee' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.Red ? '#c62828' : '#888',
+                    fontWeight: features.Red ? 'bold' : 'normal'
+                  }}>
+                    Red {features.Red ? '✓' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.Light_Brown ? '#efebe9' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.Light_Brown ? '#795548' : '#888',
+                    fontWeight: features.Light_Brown ? 'bold' : 'normal'
+                  }}>
+                    Light Brown {features.Light_Brown ? '✓' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.Dark_Brown ? '#d7ccc8' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.Dark_Brown ? '#4e342e' : '#888',
+                    fontWeight: features.Dark_Brown ? 'bold' : 'normal'
+                  }}>
+                    Dark Brown {features.Dark_Brown ? '✓' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.Blue_Gray ? '#e3f2fd' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.Blue_Gray ? '#1565c0' : '#888',
+                    fontWeight: features.Blue_Gray ? 'bold' : 'normal'
+                  }}>
+                    Blue/Gray {features.Blue_Gray ? '✓' : ''}
+                  </div>
+                  <div style={{ 
+                    padding: '8px 12px', 
+                    borderRadius: '4px', 
+                    backgroundColor: features.Black ? '#d6d6d6' : '#e0e0e0',
+                    border: '1px solid #ccc',
+                    color: features.Black ? '#000' : '#888',
+                    fontWeight: features.Black ? 'bold' : 'normal'
+                  }}>
+                    Black {features.Black ? '✓' : ''}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
