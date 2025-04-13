@@ -13,6 +13,8 @@ const Hero = () => {
   const [uploadStatus, setUploadStatus] = useState('');
   const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState(null);
+  const [features, setFeatures] = useState(null);
+  const [showFeatures, setShowFeatures] = useState(false);
   
   useEffect(() => {
     // Check if user is logged in
@@ -46,6 +48,17 @@ const Hero = () => {
           
           const response = await imageService.uploadImage(formData);
           setUploadStatus('Image uploaded successfully!');
+          
+          // Store the features from the response
+          console.log('Response from server:', response);
+          if (response.features) {
+            console.log('Features received:', response.features);
+            setFeatures(response.features);
+            setShowFeatures(true);
+          } else {
+            console.log('No features in response');
+          }
+          
           alert('Image uploaded successfully!');
         } catch (error) {
           setUploadStatus('Upload failed. Please try again.');
@@ -180,6 +193,30 @@ const Hero = () => {
             style={styles.fileInput}
             onChange={handleFileChange}
           />
+          
+          {showFeatures && features && (
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              textAlign: 'left',
+              maxHeight: '300px',
+              overflowY: 'auto'
+            }}>
+              <h3 style={{ marginBottom: '10px', color: '#333' }}>Extracted Features:</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {Object.entries(features).slice(0, 10).map(([key, value]) => (
+                  <div key={key} style={{ marginBottom: '5px' }}>
+                    <strong>{key}:</strong> {typeof value === 'number' ? value.toFixed(4) : String(value).substring(0, 20)}
+                  </div>
+                ))}
+              </div>
+              <p style={{ marginTop: '10px', fontSize: '0.9rem', color: '#666' }}>
+                Showing 10 of {Object.keys(features).length} features
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

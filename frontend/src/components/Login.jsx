@@ -1,11 +1,35 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const preventRefresh = (e) => {
-	e.preventDefault();
-};
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/api';
 
 export default function Login() {
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState('');
+	const navigate = useNavigate();
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setLoading(true);
+		setError('');
+
+		try {
+			// Call the login service
+			await authService.login({
+				email,
+				password
+			});
+			// Redirect or refresh page after successful login
+			window.location.reload();
+		} catch (err) {
+			console.error('Login error:', err);
+			setError(err.response?.data?.message || 'Invalid email or password');
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<div className="wrapper signIn">
 			<div className="illustration">
@@ -13,21 +37,36 @@ export default function Login() {
 			</div>
 			<div className="form">
 				<div className="heading">LOGIN</div>
-				<form>
+				{error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+				<form onSubmit={handleSubmit}>
 					<div>
-						<label htmlFor="name">Name</label>
-						<input type="text" id="name" placeholder="Enter your name" />
+						<label htmlFor="email">E-Mail</label>
+						<input 
+							type="email" 
+							id="email" 
+							placeholder="Enter your email" 
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							required
+						/>
 					</div>
 					<div>
-						<label htmlFor="e-mail">E-Mail</label>
-						<input type="email" id="e-mail" placeholder="Enter you mail" />
+						<label htmlFor="password">Password</label>
+						<input 
+							type="password" 
+							id="password" 
+							placeholder="Enter your password" 
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							required
+						/>
 					</div>
-					<button type="submit" onClick={preventRefresh}>
-						Submit
+					<button type="submit" disabled={loading}>
+						{loading ? 'Processing...' : 'Login'}
 					</button>
 				</form>
 				<p>
-					Don't have an account ? <Link to="/signup"> Sign In </Link>
+					Don't have an account ? <Link to="/signup"> Sign Up </Link>
 				</p>
 			</div>
 		</div>

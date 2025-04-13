@@ -3,7 +3,13 @@ require('dotenv').config();
 
 const auth = (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    // Check if Authorization header exists
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
+    const token = authHeader.replace('Bearer ', '');
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });
     }
@@ -12,6 +18,7 @@ const auth = (req, res, next) => {
     req.user = { id: decoded.id };
     next();
   } catch (error) {
+    console.error('Auth error:', error.message);
     res.status(401).json({ message: 'Authentication failed' });
   }
 };

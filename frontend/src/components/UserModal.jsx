@@ -56,14 +56,29 @@ const UserModal = ({ isOpen, onClose }) => {
         {error && <p style={{color: 'red'}}>{error}</p>}
         
         <form onSubmit={handleSubmit}>
-          <label htmlFor="username">Username:</label>
-          <input 
-            type="text" 
-            id="username" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required 
-          />
+          {isLogin ? (
+            <>
+              <label htmlFor="email">Email:</label>
+              <input 
+                type="email" 
+                id="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
+            </>
+          ) : (
+            <>
+              <label htmlFor="username">Username:</label>
+              <input 
+                type="text" 
+                id="username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required 
+              />
+            </>
+          )}
           
           {!isLogin && (
             <>
