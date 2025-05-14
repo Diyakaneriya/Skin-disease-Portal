@@ -11,6 +11,7 @@ const UserModal = ({ isOpen, onClose }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('patient');
 
   if (!isOpen) return null;
 
@@ -34,7 +35,7 @@ const UserModal = ({ isOpen, onClose }) => {
           name: username,
           email,
           password,
-          role: 'patient'
+          role: role // Use selected role instead of hardcoded 'patient'
         });
         // Switch to login after successful registration
         setIsLogin(true);
@@ -90,6 +91,46 @@ const UserModal = ({ isOpen, onClose }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 required 
               />
+              
+              {/* Role Selection */}
+              <div className="role-selection">
+                <label>Select your role:</label>
+                <div className="role-options">
+                  <div className="role-option">
+                    <input
+                      type="radio"
+                      id="patient"
+                      name="role"
+                      value="patient"
+                      checked={role === "patient"}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <label htmlFor="patient">Patient</label>
+                  </div>
+                  <div className="role-option">
+                    <input
+                      type="radio"
+                      id="doctor"
+                      name="role"
+                      value="doctor"
+                      checked={role === "doctor"}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <label htmlFor="doctor">Doctor</label>
+                  </div>
+                  <div className="role-option">
+                    <input
+                      type="radio"
+                      id="admin"
+                      name="role"
+                      value="admin"
+                      checked={role === "admin"}
+                      onChange={(e) => setRole(e.target.value)}
+                    />
+                    <label htmlFor="admin">Admin</label>
+                  </div>
+                </div>
+              </div>
             </>
           )}
           
@@ -107,7 +148,11 @@ const UserModal = ({ isOpen, onClose }) => {
           </button>
         </form>
         
-        <button type="button" onClick={() => setIsLogin(!isLogin)}>
+        <button 
+          type="button" 
+          onClick={() => setIsLogin(!isLogin)}
+          className="switch-button"
+        >
           {isLogin ? 'Switch to Sign Up' : 'Switch to Login'}
         </button>
       </div>
