@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './UserModal.css';
 import { authService } from '../services/api'; // Import the service
 
@@ -12,6 +12,8 @@ const UserModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('patient');
+  const [degree, setDegree] = useState(null);
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
@@ -31,15 +33,36 @@ const UserModal = ({ isOpen, onClose }) => {
         window.location.reload(); // Refresh to update UI
       } else {
         // Register
-        await authService.register({
-          name: username,
-          email,
-          password,
-          role: role // Use selected role instead of hardcoded 'patient'
-        });
-        // Switch to login after successful registration
-        setIsLogin(true);
-        setError('Registration successful. Please login.');
+        if (role === 'doctor') {
+          // Doctor registration with degree upload
+          if (!degree) {
+            setError('Please upload your degree certificate');
+            setLoading(false);
+            return;
+          }
+          
+          // Create FormData for file upload
+          const formData = new FormData();
+          formData.append('name', username);
+          formData.append('email', email);
+          formData.append('password', password);
+          formData.append('degree', degree);
+          
+          await authService.registerDoctor(formData);
+          setIsLogin(true);
+          setError('Doctor registration submitted successfully. Your account is pending approval by an administrator.');
+        } else {
+          // Regular registration for patient and admin
+          await authService.register({
+            name: username,
+            email,
+            password,
+            role: role
+          });
+          // Switch to login after successful registration
+          setIsLogin(true);
+          setError('Registration successful. Please login.');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
@@ -131,6 +154,23 @@ const UserModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               </div>
+              
+              {/* File upload for doctor role */}
+              {role === "doctor" && (
+                <div className="degree-upload" style={{marginTop: '15px', marginBottom: '15px', border: '1px solid #ddd', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9'}}>
+                  <label htmlFor="degree" style={{fontWeight: 'bold', color: '#333'}}>Upload Degree Certificate (Required for Doctors)</label>
+                  <input
+                    type="file"
+                    id="degree"
+                    ref={fileInputRef}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => e.target.files.length > 0 ? setDegree(e.target.files[0]) : setDegree(null)}
+                    required
+                    style={{display: 'block', width: '100%', marginTop: '10px', marginBottom: '10px'}}
+                  />
+                  <small style={{display: 'block', color: '#666'}}>Accepted formats: PDF, JPG, JPEG, PNG (Max: 5MB)</small>
+                </div>
+              )}
             </>
           )}
           
