@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import UserModal from "./UserModal";
 import { authService } from "../services/api"; // Import the service
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,16 +79,22 @@ const Navbar = () => {
               <span style={navStyles.logo}>Skin-Disease-Portal</span>
             </div>
             <div style={navStyles.navLinks}>
-              <button style={navStyles.button}>Home</button>
-              <button style={navStyles.button}>How to Use</button>
-              <button style={navStyles.button}>Types</button>
+              {/* Conditional rendering based on user role */}
+              {user?.role === 'admin' ? (
+                <Link to="/admin" style={navStyles.button}>
+                  Admin Page
+                </Link>
+              ) : (
+                <>
+                  <button style={navStyles.button}>Home</button>
+                  <button style={navStyles.button}>How to Use</button>
+                  <button style={navStyles.button}>Types</button>
+                </>
+              )}
             </div>
 
             <div>
-              <button
-                style={navStyles.button}
-                onClick={handleUserClick}
-              >
+              <button style={navStyles.button} onClick={handleUserClick}>
                 <i className="fa-solid fa-user"></i>
                 {user && <span style={{marginLeft: '4px'}}>{user.name}</span>}
               </button>

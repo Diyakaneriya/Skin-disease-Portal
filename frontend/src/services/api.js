@@ -52,6 +52,24 @@ export const authService = {
   getCurrentUser: () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
+  },
+  
+  getAllUsers: async () => {
+    try {
+      const response = await api.get('/users/all');
+      return response.data;
+    } catch (error) {
+      console.error('Error in getAllUsers:', error.message);
+      // Check if it's an authentication or permission error
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Authentication required. Please log in again.');
+        } else if (error.response.status === 403) {
+          throw new Error('You do not have permission to access this resource.');
+        }
+      }
+      throw error; // Re-throw the error for the component to handle
+    }
   }
 };
 

@@ -19,6 +19,11 @@ const userModel = {
   async findById(id) {
     const [rows] = await db.execute('SELECT id, name, email, role, created_at FROM users WHERE id = ?', [id]);
     return rows[0];
+  },
+  
+  async findAll() {
+    const [rows] = await db.execute('SELECT id, name, email, role, created_at FROM users');
+    return rows;
   }
 };
 

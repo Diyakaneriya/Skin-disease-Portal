@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const imageController = require('../controllers/imageController');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Upload an image (with authentication)
 router.post('/upload', 
