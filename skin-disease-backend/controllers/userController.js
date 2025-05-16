@@ -200,6 +200,36 @@ const userController = {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
+  },
+  
+  // Get all patients with their images for doctor dashboard
+  async getPatientsWithImages(req, res) {
+    try {
+      // Check if user is a doctor
+      const requestingUser = await userModel.findById(req.user.id);
+      if (requestingUser.role !== 'doctor' || requestingUser.approval_status !== 'approved') {
+        return res.status(403).json({ message: 'Access denied. Approved doctor privileges required.' });
+      }
+      
+      // Get all patients with their images
+      const patientsWithImages = await userModel.findAllPatientsWithImages();
+      
+      // Format image URLs
+      const formattedPatients = patientsWithImages.map(patient => {
+        if (patient.images) {
+          patient.images = patient.images.map(image => ({
+            ...image,
+            imageUrl: `${req.protocol}://${req.get('host')}/${image.image_path}`
+          }));
+        }
+        return patient;
+      });
+      
+      res.json(formattedPatients);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
   }
 };
 

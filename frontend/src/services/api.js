@@ -121,6 +121,24 @@ export const authService = {
       }
       throw error;
     }
+  },
+  
+  // Get all patients with their images for doctor dashboard
+  getPatientsWithImages: async () => {
+    try {
+      const response = await api.get('/users/patients');
+      return response.data;
+    } catch (error) {
+      console.error('Error in getPatientsWithImages:', error.message);
+      if (error.response) {
+        if (error.response.status === 401) {
+          throw new Error('Authentication required. Please log in again.');
+        } else if (error.response.status === 403) {
+          throw new Error('You do not have permission to access this resource.');
+        }
+      }
+      throw error;
+    }
   }
 };
 

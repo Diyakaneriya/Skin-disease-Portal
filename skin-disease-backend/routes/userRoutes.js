@@ -13,5 +13,7 @@ router.get('/all', auth, isAdmin, userController.getAllUsers);
 router.get('/doctors/pending', auth, isAdmin, userController.getPendingDoctors);
 router.post('/doctor/approve', auth, isAdmin, userController.updateDoctorStatus);
 
+// Doctor routes
+router.get('/patients', auth, userController.getPatientsWithImages);
 
 module.exports = router;

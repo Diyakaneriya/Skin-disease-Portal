@@ -84,6 +84,13 @@ const Navbar = () => {
                 <Link to="/admin" style={navStyles.button}>
                   Admin Page
                 </Link>
+              ) : user?.role === 'doctor' ? (
+                <>
+                  <Link to="/" style={navStyles.button}>Home</Link>
+                  <Link to="/doctor-dashboard" style={navStyles.button}>
+                    Doctor Dashboard
+                  </Link>
+                </>
               ) : (
                 <>
                   <button style={navStyles.button}>Home</button>
