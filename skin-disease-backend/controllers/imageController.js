@@ -1,4 +1,5 @@
 const imageModel = require('../models/imageModel');
+const classificationModel = require('../models/classificationModel');
 const path = require('path');
 const multer = require('multer');
 const { exec, execSync } = require('child_process');
@@ -80,6 +81,8 @@ async uploadImage(req, res) {
     let features = null;
     let classification = null;
     let processingError = null;
+    let featureId = null;
+    let classificationId = null;
     
     try {
       console.log('Processing image:', imagePath);
@@ -108,6 +111,61 @@ async uploadImage(req, res) {
         features = processedData.features;
         classification = processedData.classification;
         console.log('Image processed successfully: features extracted and image classified');
+        
+        // Save features to the database
+        if (features) {
+          try {
+            // Map the features to the database schema
+            const featureData = {
+              asymmetry: features.asymmetry || 0,
+              pigment_network: features.pigment_network || 'unknown',
+              dots_globules: features.dots_globules || 'unknown',
+              streaks: features.streaks || 'unknown',
+              regression_areas: features.regression_areas || 'unknown',
+              blue_whitish_veil: features.blue_whitish_veil || 'unknown',
+              color_white: features.color_white ? 1 : 0,
+              color_red: features.color_red ? 1 : 0,
+              color_light_brown: features.color_light_brown ? 1 : 0,
+              color_dark_brown: features.color_dark_brown ? 1 : 0,
+              color_blue_gray: features.color_blue_gray ? 1 : 0,
+              color_black: features.color_black ? 1 : 0
+            };
+            
+            // Use the featureModel to store the features
+            const featureModel = require('../models/featureModel');
+            featureId = await featureModel.create(imageId, featureData);
+            console.log('Features saved to database with ID:', featureId);
+          } catch (featureSaveError) {
+            console.error('Error saving features to database:', featureSaveError);
+          }
+        }
+        
+        // Save classification to the database
+        if (classification && classification.classification && classification.classification.length > 0) {
+          try {
+            // Get the top prediction
+            const topPrediction = classification.classification[0];
+            // Map the classification result to the database enum values
+            let classResult = 'normal';
+            if (topPrediction.class_code === 'mel' || topPrediction.class_name.toLowerCase().includes('melanoma')) {
+              classResult = 'melanoma';
+            } else if (topPrediction.confidence_percent < 70) {
+              classResult = 'abnormal';
+            }
+            
+            // Store the confidence score as a decimal (0-100)
+            const confidenceScore = topPrediction.confidence_percent || (topPrediction.probability * 100);
+            
+            classificationId = await classificationModel.create(
+              imageId,
+              classResult,
+              confidenceScore
+            );
+            console.log('Classification saved to database with ID:', classificationId);
+          } catch (classSaveError) {
+            console.error('Error saving classification to database:', classSaveError);
+          }
+        }
         
         // Clean up - remove the temporary file
         fs.unlinkSync(outputPath);
@@ -144,9 +202,22 @@ async uploadImage(req, res) {
         return res.status(404).json({ message: 'Image not found' });
       }
       
+      // Add URL to the image
       image.imageUrl = `${req.protocol}://${req.get('host')}/${image.image_path}`;
       
-      res.status(200).json(image);
+      // Get feature extraction data
+      const featureModel = require('../models/featureModel');
+      const features = await featureModel.findByImageId(imageId);
+      
+      // Get classification data
+      const classification = await classificationModel.findByImageId(imageId);
+      
+      // Return all data together
+      res.status(200).json({
+        ...image,
+        features: features || null,
+        classification: classification || null
+      });
     } catch (error) {
       console.error('Error fetching image:', error);
       res.status(500).json({ message: 'Failed to retrieve image' });

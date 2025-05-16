@@ -3,6 +3,7 @@ import Index from "./pages/Index";
 import UserModal from './components/UserModal'; // Corrected Import
 import { useState, useEffect } from 'react';
 import Admin from "./pages/admin";
+import DoctorDashboard from "./pages/DoctorDashboard";
 
 
 const App = () => {
@@ -34,6 +35,7 @@ const App = () => {
                     <Route path="/" element={<Index />} />
                     <Route path="*" element={<div>404 Not Found</div>} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
                 </Routes>
             </div>
         </BrowserRouter>
