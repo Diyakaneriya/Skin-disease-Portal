@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { authService } from '../services/api';
 import api from '../services/api';
+import Navbar from '../components/Navbar';
 
 const DoctorDashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -38,9 +39,14 @@ const DoctorDashboard = () => {
   // Styles
   const styles = {
     container: {
+      paddingTop: '80px', // Account for fixed navbar
+      minHeight: '100vh',
+      backgroundColor: '#f8f9fa'
+    },
+    content: {
       padding: '20px',
       maxWidth: '1200px',
-      margin: '80px auto 20px',
+      margin: '0 auto',
     },
     header: {
       fontSize: '2rem',
@@ -274,9 +280,12 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>Doctor Dashboard</h1>
-      <div style={styles.grid}>
+    <>
+      <Navbar />
+      <div style={styles.container}>
+        <div style={styles.content}>
+          <h1 style={styles.header}>Doctor Dashboard</h1>
+          <div style={styles.grid}>
         {/* Patient List */}
         <div style={styles.patientList}>
           {patients.length === 0 ? (
@@ -409,8 +418,10 @@ const DoctorDashboard = () => {
             </>
           )}
         </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
